@@ -104,9 +104,9 @@ if $BUILD_BINUTILS; then
     cd $BUILD/binutils
     if [ $REBUILD -eq 1 ] || [ ! -f $BUILD/binutils/Makefile ]; then
         if [ "$ARCH" = "x86_32" ]; then
-            $SRC/binutils/configure --target=$TARGET --prefix=$PREFIX --disable-nls
+            $SRC/binutils/configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-werror
         else
-            $SRC/binutils/configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-64-bit-bfd
+            $SRC/binutils/configure --target=$TARGET --prefix=$PREFIX --disable-nls --disable-werror --enable-64-bit-bfd
         fi
         if [ $? -ne 0 ]; then
             exit 1
@@ -128,7 +128,7 @@ if $BUILD_GCC || $BUILD_CPP; then
     cat $ROOT/$NEWLIB_ARCH | gunzip | tar -C tmp -xf - newlib-$NEWLVER/newlib/libc/include
     mv tmp/newlib-$NEWLVER/newlib/libc/include $DIST/$TARGET
     rm -Rf tmp
-    
+
     # the mutexes should be initialized with 0
     sed --in-place -e 's/#define PTHREAD_MUTEX_INITIALIZER  ((pthread_mutex_t) 0xFFFFFFFF)/#define PTHREAD_MUTEX_INITIALIZER  ((pthread_mutex_t) 0)/g' $DIST/$TARGET/include/pthread.h
 fi
@@ -200,7 +200,7 @@ if $BUILD_GCC; then
       -o $DIST/$TARGET/lib/libc.so $DIST/$TARGET/lib/crt0S.o || exit 1
     # cleanup
     rm -f $TMPCRT0 $TMPCRT1 $TMPCRTN
-    
+
     # now build libgcc
     make $MAKE_ARGS all-target-libgcc && make install-target-libgcc
     if [ $? -ne 0 ]; then
