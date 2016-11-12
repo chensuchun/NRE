@@ -41,7 +41,7 @@ Ports::port_t Log::get_com1_base() {
     Ports::port_t base = *reinterpret_cast<uint16_t*>(virt + BDA_COM_PORTS_OFF);
     Hypervisor::unmap_mem(virt, ExecEnv::PAGE_SIZE);
     VirtualMemory::free(virt, ExecEnv::PAGE_SIZE);
-    return base;
+    return base ? base : 0x3F8;
 }
 
 Log::Log() : BaseSerial(), _ports(get_com1_base(), 6), _sm(1), _ready(true) {
