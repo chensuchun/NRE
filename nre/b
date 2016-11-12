@@ -147,7 +147,7 @@ done
 binary=""
 case "$cmd" in
     # check parameters
-    bochs|qemu|srv|srvp|dbg|dbgr)
+    bochs|qemu|gem5|srv|srvp|dbg|dbgr)
         if [ "$script" = "" ]; then
             echo "Usage: $0 $cmd <script>" >&2
             exit 1
@@ -200,9 +200,6 @@ if $dobuild; then
         done
     )
 
-    # build userland
-    scons $opts || exit 1
-
     if [ -d $novadir/build ]; then
         cd $novadir/build
         
@@ -235,6 +232,9 @@ if $dobuild; then
     else
         echo "NOVA source not found. Not building the hypervisor."
     fi
+
+    # build userland
+    scons $opts || exit 1
 fi
 
 # after building, check whether the requested binary really exists
@@ -275,6 +275,9 @@ case "$cmd" in
         ;;
     qemunet)
         $QEMU $QEMU_FLAGS -boot n -bootp pulsar -tftp $NRE_TFTPDIR
+        ;;
+    gem5)
+        ./tools/gem5.sh $PWD/$build
         ;;
     srv)
         ./$script --server --build-dir="$PWD/$build" --strip-rom

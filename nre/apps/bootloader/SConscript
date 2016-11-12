@@ -1,0 +1,20 @@
+# -*- Mode: Python -*-
+
+Import('env')
+
+myenv = env.Clone()
+ldscript = 'apps/bootloader/ld.conf'
+myenv.Append(CXXFLAGS = ' -fno-exceptions -fno-rtti -mno-sse -O2')
+myenv.Append(LINKFLAGS = ' -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wl,-T,' + ldscript)
+
+loader = myenv.Object('loader.o', 'loader.cc')
+for bin in ['hypervisor-elf64', 'root', 'unittests']:
+	myenv.NREDump(myenv, target = bin + '.dump', source = '$BUILDDIR/bin/apps/' + bin)
+	myenv.Depends(loader, '$BUILDDIR/' + bin + '.dump')
+
+prog = myenv.Program(
+    target = 'bootloader',
+    source = ['start.S', loader, 'serial.cc']
+)
+myenv.Depends(prog, '#' + ldscript)
+myenv.Install(myenv['BINARYDIR'], prog)

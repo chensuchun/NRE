@@ -112,6 +112,11 @@ if target == 'x86_64':
 else:
     env.Append(LINK_ADDR = 0x100000)
 
+def NREDump(env, target, source):
+    dump = env.Command(target, source, builddir + '/tools/dump/dump $SOURCE > $TARGET')
+    env.Depends(dump, '$BUILDDIR/tools/dump/dump')
+    env.Install('$BUILDDIR', dump)
+
 def NREProgram(env, target, source, libs = [], cpppath = [], fixedaddr = False, ldscript = 'default'):
     # for better debugging: put every executable at a different address
     myenv = env.Clone()
@@ -132,6 +137,7 @@ def NREProgram(env, target, source, libs = [], cpppath = [], fixedaddr = False, 
     myenv.Install(env['BINARYDIR'], prog)
     return prog
 
+env.NREDump = NREDump
 env.NREProgram = NREProgram
 hostenv.SConscript('tools/SConscript', 'hostenv',
                    variant_dir = builddir + '/tools', duplicate = 0)
