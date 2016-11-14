@@ -837,7 +837,7 @@ void ChildManager::Portals::ex_pf(Child *c) {
     uintptr_t eip = uf->rip;
 
     // voluntary exit?
-    if(pfaddr == eip && pfaddr >= ExecEnv::EXIT_START && pfaddr <= ExecEnv::THREAD_EXIT) {
+    if(/*pfaddr == eip && */pfaddr >= ExecEnv::EXIT_START && pfaddr <= ExecEnv::THREAD_EXIT) {
         cm->term_child(c, 0, uf);
         return;
     }
