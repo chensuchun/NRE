@@ -1,7 +1,7 @@
 #!/bin/sh
 gem5dir=/home/hrniels/imdata/cycle-accurate-sim/hw/gem5
 
-gem5args=" --remote-gdb-port=1234 --debug-flags=Faults,IdeCtrl,IdeDisk,I8259,I82094AA"
+gem5args=" --remote-gdb-port=1234 --debug-flags=Faults"
 # gem5args="$gem5args --debug-start=3821158000"
 gem5args="$gem5args $gem5dir/configs/example/fs.py"
 gem5args="$gem5args --command-line=\"novga serial\""
