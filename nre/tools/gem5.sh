@@ -5,7 +5,8 @@ gem5args=" --remote-gdb-port=1234 --debug-flags=Faults,IdeCtrl,IdeDisk,I8259,I82
 # gem5args="$gem5args --debug-start=3821158000"
 gem5args="$gem5args $gem5dir/configs/example/fs.py"
 gem5args="$gem5args --command-line=\"novga serial\""
-gem5args="$gem5args --caches --l2cache --cpu-type timing --cpu-clock 1GHz --mem-size=256MB -n 2 --ruby"
+gem5args="$gem5args --caches --l2cache --cpu-type detailed --cpu-clock 1GHz --mem-size=256MB"
+gem5args="$gem5args -n 2"
 
 imgs=`mktemp -d`
 mkdir $imgs/binaries
