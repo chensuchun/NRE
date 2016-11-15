@@ -24,7 +24,7 @@ using namespace nre;
 using namespace nre::test;
 
 static const size_t DS_SIZE     = ExecEnv::PAGE_SIZE;
-static const size_t MAP_COUNT   = 10000;
+static const size_t MAP_COUNT   = 100;
 
 static void test_ds();
 
