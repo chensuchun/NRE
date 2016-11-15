@@ -52,7 +52,7 @@ public:
         return time;
     }
 
-private:
+protected:
     static time_t measure() {
         time_t tic = Util::tsc();
         time_t tac = Util::tsc();
@@ -67,17 +67,60 @@ private:
 
 class AvgProfiler : public Profiler {
 public:
-    explicit AvgProfiler(size_t count) : _count(count), _pos(0), _results(new time_t[count]) {
+    explicit AvgProfiler(size_t count, size_t warmup = 5, time_t outlier = ~0ULL)
+        : _count(count), _warmup(warmup), _outlier(outlier), _pos(0), _results(new time_t[count]) {
     }
     virtual ~AvgProfiler() {
         delete[] _results;
     }
 
+    time_t result(size_t i) const {
+        return _results[i];
+    }
+
+    time_t min() const {
+        time_t val = ~0ULL;
+        for(size_t i = _warmup; i < _count; i++) {
+            if(_results[i] < val)
+                val = _results[i];
+        }
+        return val;
+    }
+
+    time_t max() const {
+        time_t val = 0;
+        for(size_t i = _warmup; i < _count; i++) {
+            if(_results[i] > val && _results[i] <= _outlier)
+                val = _results[i];
+        }
+        return val;
+    }
+
     time_t avg() const {
         time_t avg = 0;
-        for(size_t i = 0; i < _count; i++)
-            avg += _results[i];
-        return avg / _count;
+        size_t count = _count - _warmup;
+        for(size_t i = _warmup; i < _count; i++) {
+            if(_results[i] <= _outlier)
+                avg += _results[i];
+            else
+                count--;
+        }
+        return count == 0 ? 0 : avg / count;
+    }
+
+    float variance() const {
+        time_t sum = 0;
+        time_t average = avg();
+        size_t count = _count - _warmup;
+        for(size_t i = _warmup; i < _count; i++) {
+            if(_results[i] <= _outlier) {
+                int64_t val = (int64_t)_results[i] - average;
+                sum += val * val;
+            }
+            else
+                count--;
+        }
+        return (float)sum / count;
     }
 
     virtual void start() {
@@ -85,13 +128,16 @@ public:
         Profiler::start();
     }
     virtual time_t stop() {
-        time_t time = Profiler::stop();
+        time_t time = Util::tsc() - _start;
+        time = time > _rdtsc ? time - _rdtsc : 0;
         _results[_pos++] = time;
         return time;
     }
 
 private:
     size_t _count;
+    size_t _warmup;
+    time_t _outlier;
     size_t _pos;
     time_t *_results;
 };
