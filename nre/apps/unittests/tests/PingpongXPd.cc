@@ -38,7 +38,8 @@ const TestCase pingpongxpd = {
 
 typedef void (*client_func)(AvgProfiler &prof, Pt &pt, UtcbFrame &uf, uint &sum);
 
-static const uint tries = 10000;
+static const uint tries = 1000;
+static const Profiler::time_t outlier = 100000;
 static PingpongService *srv;
 
 class PingpongSession : public ServiceSession {
@@ -107,12 +108,14 @@ static void client_data(AvgProfiler &prof, Pt &pt, UtcbFrame &uf, uint &sum) {
 }
 
 static int pingpong_client(int, char *argv[]) {
-    ClientSession sess("pingpong");
-    Pt pt(sess.caps() + CPU::current().log_id());
     uintptr_t addr = IStringStream::read_from<uintptr_t>(argv[1]);
+    int cpu = IStringStream::read_from<int>(argv[2]);
+
+    ClientSession sess("pingpong");
+    Pt pt(sess.caps() + cpu);
     client_func func = reinterpret_cast<client_func>(addr);
     uint sum = 0;
-    AvgProfiler prof(tries);
+    AvgProfiler prof(tries, 5, outlier);
     UtcbFrame uf;
     for(uint i = 0; i < tries; i++)
         func(prof, pt, uf, sum);
@@ -122,6 +125,7 @@ static int pingpong_client(int, char *argv[]) {
     WVPRINT("sum: " << sum);
     WVPRINT("min: " << prof.min());
     WVPRINT("max: " << prof.max());
+    WVPRINT("var: " << prof.variance());
     return 0;
 }
 
@@ -131,28 +135,31 @@ static void test_pingpong() {
     Service::portal_func funcs[] = {portal_empty, portal_data};
     client_func clientfuncs[] = {client_empty, client_data};
     const char *names[] = {"empty", "data"};
-    for(size_t i = 0; i < ARRAY_SIZE(funcs); ++i) {
-        WVPRINT("Using the " << names[i] << " portal:");
-        // map the memory of the module
-        DataSpace ds(self->size, DataSpaceDesc::ANONYMOUS, DataSpaceDesc::R, self->addr);
-        {
-            char cmdline[64];
-            OStringStream os(cmdline, sizeof(cmdline));
-            os << "pingpongservice provides=pingpong " << reinterpret_cast<uintptr_t>(funcs[i]);
-            ChildConfig cfg(0, cmdline);
-            cfg.entry(reinterpret_cast<uintptr_t>(pingpong_server));
-            mng->load(ds.virt(), self->size, cfg);
+    for(auto cpu = CPU::begin(); cpu != CPU::end(); ++cpu) {
+        for(size_t i = 0; i < ARRAY_SIZE(funcs); ++i) {
+            WVPRINT("Using the " << names[i] << " portal between CPU "
+                << CPU::current().log_id() << " and " << cpu->log_id() << ":");
+            // map the memory of the module
+            DataSpace ds(self->size, DataSpaceDesc::ANONYMOUS, DataSpaceDesc::R, self->addr);
+            {
+                char cmdline[64];
+                OStringStream os(cmdline, sizeof(cmdline));
+                os << "pingpongservice provides=pingpong " << reinterpret_cast<uintptr_t>(funcs[i]);
+                ChildConfig cfg(0, cmdline);
+                cfg.entry(reinterpret_cast<uintptr_t>(pingpong_server));
+                mng->load(ds.virt(), self->size, cfg);
+            }
+            {
+                char cmdline[64];
+                OStringStream os(cmdline, sizeof(cmdline));
+                os << "pingpongclient " << reinterpret_cast<uintptr_t>(clientfuncs[i]) << " " << cpu->log_id();
+                ChildConfig cfg(0, cmdline);
+                cfg.entry(reinterpret_cast<uintptr_t>(pingpong_client));
+                mng->load(ds.virt(), self->size, cfg);
+            }
+            while(mng->count() > 0)
+                mng->dead_sm().down();
         }
-        {
-            char cmdline[64];
-            OStringStream os(cmdline, sizeof(cmdline));
-            os << "pingpongclient " << reinterpret_cast<uintptr_t>(clientfuncs[i]);
-            ChildConfig cfg(0, cmdline);
-            cfg.entry(reinterpret_cast<uintptr_t>(pingpong_client));
-            mng->load(ds.virt(), self->size, cfg);
-        }
-        while(mng->count() > 0)
-            mng->dead_sm().down();
     }
     delete mng;
 }
