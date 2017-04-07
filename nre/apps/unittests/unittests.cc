@@ -39,6 +39,7 @@
 #include "tests/Sessions.h"
 #include "tests/ProducerConsumer.h"
 #include "tests/ThreadRefs.h"
+#include "tests/Syscall.h"
 
 using namespace nre;
 using namespace nre::test;

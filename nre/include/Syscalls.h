@@ -167,7 +167,7 @@ public:
      * @param name the name
      * @throws SyscallException if the system-call failed (result != E_SUCCESS)
      */
-#if HAVE_KERNEL_EXTENSIONS
+#if 0 && HAVE_KERNEL_EXTENSIONS
     static void pd_ctrl(capsel_t pd, const char *name) {
         SyscallABI::syscall(pd << 8 | PD_CTRL, reinterpret_cast<word_t>(name));
     }
@@ -268,6 +268,10 @@ public:
         word_t out1, out2;
         SyscallABI::syscall(LOOKUP, crd.value(), 0, 0, 0, out1, out2);
         return Crd(out1);
+    }
+
+    static void noop() {
+        SyscallABI::syscall(PD_CTRL);
     }
 
 private:
