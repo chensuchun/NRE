@@ -30,7 +30,7 @@ const TestCase pingpong = {
     "PingPong", test_pingpong
 };
 
-static const uint tries = 10000;
+static const uint tries = 100;
 
 PORTAL static void portal_empty(void*) {
 }
@@ -72,22 +72,22 @@ static void test_pingpong() {
         print_result(prof, (1 + 2) * tries + (1 + 2 + 3) * tries);
     }
 
-    {
-        Pt pt(ec, portal_data);
-        AvgProfiler prof(tries);
-        uint sum = 0;
-        UtcbFrame uf;
-        for(uint i = 0; i < tries; i++) {
-            prof.start();
-            uf << 1 << 2 << 3;
-            pt.call(uf);
-            uint x = 0, y = 0;
-            uf >> x >> y;
-            uf.clear();
-            sum += x + y;
-            prof.stop();
-        }
-        WVPRINT("Using portal_data:");
-        print_result(prof, sum);
-    }
+    // {
+    //     Pt pt(ec, portal_data);
+    //     AvgProfiler prof(tries);
+    //     uint sum = 0;
+    //     UtcbFrame uf;
+    //     for(uint i = 0; i < tries; i++) {
+    //         prof.start();
+    //         uf << 1 << 2 << 3;
+    //         pt.call(uf);
+    //         uint x = 0, y = 0;
+    //         uf >> x >> y;
+    //         uf.clear();
+    //         sum += x + y;
+    //         prof.stop();
+    //     }
+    //     WVPRINT("Using portal_data:");
+    //     print_result(prof, sum);
+    // }
 }

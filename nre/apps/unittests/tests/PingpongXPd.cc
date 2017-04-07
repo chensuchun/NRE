@@ -38,7 +38,7 @@ const TestCase pingpongxpd = {
 
 typedef void (*client_func)(AvgProfiler &prof, Pt &pt, UtcbFrame &uf, uint &sum);
 
-static const uint tries = 1000;
+static const uint tries = 100;
 static const Profiler::time_t outlier = 100000;
 static PingpongService *srv;
 
@@ -132,8 +132,8 @@ static int pingpong_client(int, char *argv[]) {
 static void test_pingpong() {
     ChildManager *mng = new ChildManager();
     Hip::mem_iterator self = Hip::get().mem_begin();
-    Service::portal_func funcs[] = {portal_empty, portal_data};
-    client_func clientfuncs[] = {client_empty, client_data};
+    Service::portal_func funcs[] = {portal_empty/*, portal_data*/};
+    client_func clientfuncs[] = {client_empty/*, client_data*/};
     const char *names[] = {"empty", "data"};
     for(auto cpu = CPU::begin(); cpu != CPU::end(); ++cpu) {
         for(size_t i = 0; i < ARRAY_SIZE(funcs); ++i) {
