@@ -261,6 +261,16 @@ int main() {
 
     start_childs();
 
+    // wait until a child exited
+    mng->dead_sm().down();
+
+    // shutdown gem5
+    asm volatile (
+        ".byte 0x0F, 0x04;"
+        ".word 0x21;"
+        : : "D"(0)
+    );
+
     Sm sm(0);
     sm.down();
     return 0;
