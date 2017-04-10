@@ -1,8 +1,9 @@
 #!/bin/sh
 gem5dir=/home/hrniels/imdata/cycle-accurate-sim/hw/gem5
 
+# Exec,ExecPC,Faults,I82094AA,LocalApic
 gem5args=" --remote-gdb-port=1234 --debug-flags=Faults"
-# gem5args="$gem5args --debug-start=3821158000"
+# gem5args="$gem5args --debug-start=3071984000"
 gem5args="$gem5args $gem5dir/configs/example/fs.py"
 gem5args="$gem5args --command-line=\"novga serial\""
 gem5args="$gem5args --caches --l2cache --cpu-type detailed --cpu-clock 1GHz --mem-size=256MB"
