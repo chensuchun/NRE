@@ -108,21 +108,19 @@ static void client_data(AvgProfiler &prof, Pt &pt, UtcbFrame &uf, uint &sum) {
 }
 
 static int pingpong_client(int, char *argv[]) {
-    uintptr_t addr = IStringStream::read_from<uintptr_t>(argv[1]);
     int cpu = IStringStream::read_from<int>(argv[2]);
 
     ClientSession sess("pingpong");
     Pt pt(sess.caps() + cpu);
-    client_func func = reinterpret_cast<client_func>(addr);
-    uint sum = 0;
     AvgProfiler prof(tries, 5, outlier);
     UtcbFrame uf;
-    for(uint i = 0; i < tries; i++)
-        func(prof, pt, uf, sum);
+    for(uint i = 0; i < tries; i++) {
+        prof.start();
+        pt.call(uf);
+        prof.stop();
+    }
 
     WVPERF(prof.avg(), "cycles");
-    WVPASSEQ(sum, (1 + 2) * tries + (1 + 2 + 3) * tries);
-    WVPRINT("sum: " << sum);
     WVPRINT("min: " << prof.min());
     WVPRINT("max: " << prof.max());
     WVPRINT("var: " << prof.variance());

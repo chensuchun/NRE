@@ -26,7 +26,7 @@ using namespace nre::test;
 
 static void test_syscall();
 
-static const uint COUNT = 1000;
+static const uint COUNT = 100;
 
 const TestCase syscall = {
     "Reference syscalls", test_syscall
@@ -43,4 +43,5 @@ static void test_syscall() {
     WVPERF(prof.avg(), "cycles");
     WVPRINT("min: " << prof.min());
     WVPRINT("max: " << prof.max());
+    WVPRINT("var: " << prof.variance());
 }

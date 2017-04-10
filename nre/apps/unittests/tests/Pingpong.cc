@@ -69,7 +69,10 @@ static void test_pingpong() {
             prof.stop();
         }
         WVPRINT("Using portal_empty:");
-        print_result(prof, (1 + 2) * tries + (1 + 2 + 3) * tries);
+        WVPERF(prof.avg(), "cycles");
+        WVPRINT("min: " << prof.min());
+        WVPRINT("max: " << prof.max());
+        WVPRINT("max: " << prof.variance());
     }
 
     // {
