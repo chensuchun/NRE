@@ -40,6 +40,7 @@
 #include "tests/ProducerConsumer.h"
 #include "tests/ThreadRefs.h"
 #include "tests/Syscall.h"
+#include "tests/MemSpeed.h"
 
 using namespace nre;
 using namespace nre::test;
@@ -48,9 +49,9 @@ const TestCase testcases[] = {
     // memcpytest,
     // memsettest,
     // threads,
-    pingpongxpd,
-    pingpong,
     syscall,
+    pingpong,
+    pingpongxpd,
     // catchex,
     // delegateperf,
     // utcbnest,
